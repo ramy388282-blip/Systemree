@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>نظام الرقابة والمخاطر - المدير</title>
+<style>
+body {
+  font-family: "Cairo", Arial, sans-serif;
+  background-color: #eaf3ff;
+  margin: 0;
+  padding: 0;
+}
+header {
+  text-align: center;
+  background: #007bff;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+header h3 {
+  margin: 5px 0;
+  font-size: 20px;
+  font-weight: normal;
+}
+.container {
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  margin: auto;
+  box-sizing: border-box;
+}
+input, select, textarea, button {
+  padding: 8px;
+  margin: 5px 0;
+  width: 100%;
+}
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: auto;
+}
+th, td {
+  border: 1px solid #007bff;
+  padding: 8px;
+  text-align: center;
+  word-break: break-word;
+  min-width: 80px;
+}
+th {
+  background: #007bff;
+  color: white;
+}
+#topButtons {
+  margin-top: 25px;
+  margin-bottom: -5px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+#searchSection {
+  margin-top: 20px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+form {
+  margin-top: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+form label {
+  font-weight: bold;
+  margin-top: 10px;
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>نظام الرقابة والمخاطر</h1>
+  <h3 id="currentUser">النظام يستخدم من قبل: المدير</h3>
+</header>
+
+<div class="container">
+
+  <!-- نموذج إضافة تقرير -->
+  <form id="reportForm">
+    <h3>إضافة تقرير جديد</h3>
+    <label>الإدارة</label>
+    <select id="department"></select>
+    <label>رقم الملاحظة</label>
+    <input type="number" id="noteNumber" readonly value="1">
+    <label>تاريخ الملاحظة</label>
+    <input type="date" id="noteDate">
+    <label>الفرع</label>
+    <select id="branch"></select>
+    <label>الموظف المعني</label>
+    <select id="employee"></select>
+    <label>المنطقة</label>
+    <select id="region"></select>
+    <label>نوع الملاحظة</label>
+    <select id="noteType"><option>تنبيه</option><option>تقرير</option><option>ملاحظة</option></select>
+    <label>بيان الملاحظة</label>
+    <textarea id="noteText"></textarea>
+    <label>المبلغ</label>
+    <input type="number" id="noteAmount">
+    <label>العملة</label>
+    <select id="currency"></select>
+    <label>درجة المخاطر</label>
+    <select id="riskLevel"><option>منخفض</option><option>متوسط</option><option>مرتفع</option></select>
+    <label>توصيات الرقابة</label>
+    <textarea id="recommendations"></textarea>
+    <label>موظف مختص الرقابة</label>
+    <input type="text" id="supervisor">
+    <label>نسبة المعالجة</label>
+    <input type="text" id="treatmentRate">
+    <label>حالة المعالجة</label>
+    <select id="treatmentStatus"><option>غير معالجة</option><option>معالجة</option></select>
+    <label>إرفاق ملف</label>
+    <input type="file" id="attachment">
+    <button type="button" onclick="saveReport()">إضافة التقرير</button>
+      <button type="button" onclick="window.location.href=' login.html'">رجوع تسجيل الدخول</button>
+
+  </form>
+
+  <!-- البحث المتقدم -->
+  <div id="searchSection">
+    <h3>بحث متقدم</h3>
+    <label>المنطقة</label>
+    <select id="searchRegion"><option value="">الكل</option></select>
+    <label>الفرع</label>
+    <select id="searchBranch"><option value="">الكل</option></select>
+    <label>الموظف</label>
+    <select id="searchEmployee"><option value="">الكل</option></select>
+    <label>المستخدم</label>
+    <input type="text" id="searchUser" placeholder="اسم المستخدم">
+    <label>التاريخ من</label>
+    <input type="date" id="searchDateFrom">
+    <label>التاريخ إلى</label>
+    <input type="date" id="searchDateTo">
+    <button onclick="searchReports()">بحث</button>
+    <button onclick="fetchReports()">عرض الكل</button>
+  </div>
+
+  <!-- الأزرار الثلاثة فوق الجدول -->
+  <div id="topButtons">
+    <button onclick="printReports()">🖨️ طباعة</button>
+    <button onclick="exportExcel()">📤 تصدير Excel</button>
+    <button onclick="window.location.href='adduser.html'">⚙️ إدارة النظام</button>
+  </div>
+
+  <!-- جدول التقارير -->
+  <table id="reportsTable">
+    <thead>
+      <tr>
+        <th>رقم الملاحظة</th>
+        <th>الإدارة</th>
+        <th>تاريخ الملاحظة</th>
+        <th>الفرع</th>
+        <th>الموظف</th>
+        <th>المنطقة</th>
+        <th>نوع الملاحظة</th>
+        <th>بيان الملاحظة</th>
+        <th>المبلغ</th>
+        <th>العملة</th>
+        <th>درجة المخاطر</th>
+        <th>توصيات الرقابة</th>
+        <th>موظف مختص الرقابة</th>
+        <th>نسبة المعالجة</th>
+        <th>حالة المعالجة</th>
+        <th>الملف المرفق</th>
+        <th>تحديث الحالة</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKF-k2_ISY-mjO7tpf60USp1hysMbxvjVi423hg1X2TovVGLLjDCUtoaGB7dmgN0sw/exec"; // رابط جدول الموظفين
+
+const username = localStorage.getItem("username") || "المدير";
+document.getElementById("currentUser").textContent = "النظام يستخدم من قبل: " + username;
+
+// ==== تحميل البيانات للكمبوكسات ====
+async function loadComboboxData(){
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({action:"getComboboxData"})
+    });
+    const data = await res.json();
+
+    populateSelect("department", data.departments);
+    populateSelect("branch", data.branches);
+    populateSelect("employee", data.employees);
+    populateSelect("region", data.regions);
+    populateSelect("currency", data.currencies);
+
+    ["department","branch","employee","region","currency"].forEach(enableSearchable);
+
+    // البحث المتقدم أيضاً
+    populateSelect("searchRegion", data.regions, true);
+    populateSelect("searchBranch", data.branches, true);
+    populateSelect("searchEmployee", data.employees, true);
+
+  } catch(e) {
+    console.error("خطأ في تحميل البيانات من Google Sheet:", e);
+  }
+}
+
+function populateSelect(id, options, addEmpty=false){
+  const select = document.getElementById(id);
+  select.innerHTML = "";
+  if(addEmpty) select.appendChild(new Option("الكل",""));
+  options.forEach(opt=>{
+    select.appendChild(new Option(opt,opt));
+  });
+}
+
+function enableSearchable(id){
+  const select = document.getElementById(id);
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "relative";
+  select.parentNode.insertBefore(wrapper, select);
+  wrapper.appendChild(select);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "بحث...";
+  input.style.width = "100%";
+  input.style.marginBottom = "5px";
+  wrapper.insertBefore(input, select);
+
+  input.addEventListener("input", ()=>{
+    const filter = input.value.toLowerCase();
+    Array.from(select.options).forEach(opt=>{
+      opt.style.display = opt.text.toLowerCase().includes(filter) ? "" : "none";
+    });
+  });
+}
+
+// ==== باقي كود حفظ وعرض التقارير كما كان ====
+async function saveReport(){
+  const report = {
+    noteNumber: document.getElementById('noteNumber').value,
+    department: document.getElementById('department').value,
+    noteDate: document.getElementById('noteDate').value,
+    branch: document.getElementById('branch').value,
+    employee: document.getElementById('employee').value,
+    region: document.getElementById('region').value,
+    noteType: document.getElementById('noteType').value,
+    noteText: document.getElementById('noteText').value,
+    noteAmount: document.getElementById('noteAmount').value,
+    currency: document.getElementById('currency').value,
+    riskLevel: document.getElementById('riskLevel').value,
+    recommendations: document.getElementById('recommendations').value,
+    supervisor: document.getElementById('supervisor').value,
+    treatmentRate: document.getElementById('treatmentRate').value,
+    treatmentStatus: document.getElementById('treatmentStatus').value,
+    attachment: document.getElementById('attachment').files[0] ? document.getElementById('attachment').files[0].name : ""
+  };
+
+  await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "addReport", report })
+  });
+
+  alert("تم إضافة التقرير بنجاح!");
+  document.getElementById("noteNumber").value = parseInt(document.getElementById("noteNumber").value) + 1;
+  document.getElementById("reportForm").reset();
+  fetchReports();
+}
+
+async function fetchReports(){
+  const res = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getReports" })
+  });
+  const reports = await res.json();
+  displayReports(reports);
+}
+
+function displayReports(reports){
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  reports.forEach((r, index)=>{
+    const row = document.createElement("tr");
+    r.forEach(value=>{
+      const td = document.createElement("td");
+      td.textContent = value;
+      row.appendChild(td);
+    });
+    const statusTd = document.createElement("td");
+    const select = document.createElement("select");
+    ["","معتمد","مرفوض"].forEach(opt=>{
+      const optionEl = document.createElement("option");
+      optionEl.value = opt;
+      optionEl.textContent = opt;
+      if(opt === r[14]) optionEl.selected = true;
+      select.appendChild(optionEl);
+    });
+    select.onchange = ()=>updateStatus(index, select.value);
+    statusTd.appendChild(select);
+    row.appendChild(statusTd);
+    tbody.appendChild(row);
+  });
+}
+
+async function updateStatus(index, status){
+  if(!status) return;
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    body: JSON.stringify({action:"updateStatus", row:index, status:status})
+  });
+}
+
+function searchReports(){
+  const region = document.getElementById("searchRegion").value;
+  const branch = document.getElementById("searchBranch").value;
+  const employee = document.getElementById("searchEmployee").value;
+  const user = document.getElementById("searchUser").value;
+  const dateFrom = document.getElementById("searchDateFrom").value;
+  const dateTo = document.getElementById("searchDateTo").value;
+  const rows = Array.from(document.getElementById("tableBody").rows);
+  rows.forEach(row=>{
+    const rowRegion = row.cells[5].textContent;
+    const rowBranch = row.cells[3].textContent;
+    const rowEmployee = row.cells[4].textContent;
+    const rowUser = row.cells[4].textContent;
+    const rowDate = row.cells[2].textContent;
+    let show = true;
+    if(region && rowRegion!==region) show=false;
+    if(branch && rowBranch!==branch) show=false;
+    if(employee && rowEmployee!==employee) show=false;
+    if(user && rowUser.indexOf(user)===-1) show=false;
+    if(dateFrom && rowDate<dateFrom) show=false;
+    if(dateTo && rowDate>dateTo) show=false;
+    row.style.display = show ? "" : "none";
+  });
+}
+
+function printReports(){ window.print(); }
+function exportExcel(){
+  let table = document.getElementById("reportsTable");
+  let html = table.outerHTML;
+  let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+  let a = document.createElement('a'); a.href = url; a.download = 'Reports.xls'; a.click();
+}
+
+window.onload = ()=>{
+  fetchReports();
+  loadComboboxData();
+};
+</script>
+
+</body>
+</html>

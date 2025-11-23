@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>نظام الرقابة والمخاطر</title>
+<style>
+body {
+  font-family: Tahoma, sans-serif;
+  background: linear-gradient(135deg, #a8e0ff, #b3e5fc, #e1f5fe);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  direction: rtl;
+}
+
+.container {
+  background: #ffffffdd;
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0,123,255,0.4);
+  width: 95%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h2 {
+  color: #0277bd;
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+label {
+  display: block;
+  text-align: right;
+  margin-top: 15px;
+  color: #01579b;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: 1px solid #81d4fa;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #0288d1;
+  box-shadow: 0 0 5px #0288d1;
+}
+
+button {
+  background-color: #0288d1;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 15px;
+}
+
+button:hover {
+  background-color: #0277bd;
+}
+
+#errorMsg {
+  color: red;
+  margin-top: 12px;
+  font-weight: bold;
+  display: none;
+  font-size: 14px;
+}
+
+/* زر الخروج */
+#logoutBtn {
+  background-color: #f44336;
+  margin-top: 10px;
+}
+
+#logoutBtn:hover {
+  background-color: #d32f2f;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>تسجيل الدخول</h2>
+
+  <form id="login-form">
+    <label>اسم المستخدم:</label>
+    <input type="text" id="username" placeholder="أدخل اسم المستخدم" required>
+
+    <label>كلمة المرور:</label>
+    <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+
+    <button type="submit">دخول</button>
+    <button type="button" id="logoutBtn">خروج</button>
+
+    <div id="errorMsg">اسم المستخدم أو كلمة المرور خاطئة</div>
+  </form>
+</div>
+
+<script>
+// رابط الويب آب الجديد تبعك
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvbZlQvpFvPk8kXj1NympUA-dmDARu2AnDOqJM20uyWejuVrJoVu3lphMHWzkMk7ki/exec";
+
+const loginForm = document.getElementById('login-form');
+const errorMsg = document.getElementById('errorMsg');
+const logoutBtn = document.getElementById('logoutBtn');
+
+loginForm.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  // إرسال البيانات للسكربت للتحقق
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await response.json();
+
+  if (data.valid) {
+    alert(`تم تسجيل الدخول بنجاح! مرحباً ${username}`);
+    errorMsg.style.display = 'none';
+
+    // تحويل حسب الدور
+    if (data.role === "admin") {
+      window.location.href = "manager.html";
+    } else {
+      window.location.href = "user.html";
+    }
+
+  } else {
+    errorMsg.style.display = 'block';
+  }
+});
+
+// زر الخروج
+logoutBtn.addEventListener('click', () => {
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  errorMsg.style.display = 'none';
+});
+</script>
+</body>
+</html>

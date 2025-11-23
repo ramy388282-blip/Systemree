@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إدارة المستخدمين</title>
+<style>
+body { font-family: "Cairo", Arial, sans-serif; background:#eaf3ff; padding:20px; }
+input, select, button { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
+button { background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; }
+table { width:100%; border-collapse:collapse; margin-top:20px; }
+th, td { border:1px solid #007bff; padding:8px; text-align:center; }
+th { background:#007bff; color:white; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>إدارة المستخدمين</h1>
+</header>
+  <div class="container">
+
+<form id="addUserForm">
+  <input type="text" id="username" placeholder="اسم المستخدم" required>
+  <input type="password" id="password" placeholder="كلمة المرور" required>
+  <select id="role">
+    <option value="admin">مدير</option>
+    <option value="user">مستخدم عادي</option>
+  </select>
+  <button type="submit">إضافة المستخدم</button>
+  <button onclick="window.location.href=' index.html'">رجوع الى الرئيسية</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>رقم</th>
+      <th>اسم المستخدم</th>
+      <th>كلمة المرور</th>
+      <th>الصلاحية</th>
+      <th>الحالة</th>
+      <th>أوامر</th>
+    </tr>
+  </thead>
+  <tbody id="usersBody"></tbody>
+</table>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9nGKq6a0YvInTtV5vfrtc1TjnUzHUbxnEBZ9clx_BIbA4Jkbao-49TyhtJyszzoxJ2g/exec";
+
+// جلب وعرض المستخدمين
+async function loadUsers() {
+  const res = await fetch(WEB_APP_URL);
+  const users = await res.json();
+  renderUsers(users);
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById("usersBody");
+  tbody.innerHTML = "";
+  users.forEach((u,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${u.username}</td>
+      <td>${u.password}</td>
+      <td>${u.role}</td>
+      <td>${u.active ? "نشط" : "متوقف"}</td>
+      <td>
+        <button onclick='editUser(${i})'>تعديل</button>
+        <button onclick='toggleUser(${i})'>${u.active?"توقيف":"تنشيط"}</button>
+        <button onclick='deleteUser(${i})'>حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// إضافة مستخدم
+document.getElementById("addUserForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const user = {
+    username: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    role: document.getElementById("role").value
+  };
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"add", user})
+  });
+  document.getElementById("addUserForm").reset();
+  loadUsers();
+});
+
+// تعديل مستخدم
+async function editUser(index){
+  const username = prompt("اسم المستخدم الجديد:");
+  const password = prompt("كلمة المرور الجديدة:");
+  const role = prompt("الصلاحية admin/user:");
+  if(!username || !password || !role) return;
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"update", index, user:{username,password,role}})
+  });
+  loadUsers();
+}
+
+// حذف مستخدم
+async function deleteUser(index){
+  if(!confirm("هل تريد حذف هذا المستخدم؟")) return;
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"delete", index})
+  });
+  loadUsers();
+}
+
+// تغيير حالة المستخدم
+async function toggleUser(index){
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"toggle", index})
+  });
+  loadUsers();
+}
+
+window.onload = loadUsers;
+</script>
+
+</body>
+</html>
