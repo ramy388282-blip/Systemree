@@ -356,6 +356,8 @@ function exportExcel(){
 }
 
 window.onload = ()=>{
+ 
+ document.getElementById("supervisor").value = localStorage.getItem("username") || ""; 
   loadComboboxData();
   fetchReports();
 };
