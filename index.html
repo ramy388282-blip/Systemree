@@ -132,6 +132,7 @@ loginForm.addEventListener('submit', async function(e) {
   if (data.valid) {
     alert(`تم تسجيل الدخول بنجاح! مرحباً ${username}`);
     errorMsg.style.display = 'none';
+localStorage.setItem("username", username);
 
     // تحويل حسب الدور
     if (data.role === "admin") {
