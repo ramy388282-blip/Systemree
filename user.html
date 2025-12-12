@@ -293,7 +293,7 @@ async function fetchReports(){
   });
   const reports = await res.json();
   // فلترة حسب المستخدم الحالي
-  const userReports = reports.filter(r => r[16] === username);
+  const userReports = reports.filter(r => r[12] === username);
   displayReports(userReports);
 }
 
